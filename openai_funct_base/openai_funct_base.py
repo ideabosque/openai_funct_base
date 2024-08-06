@@ -9,7 +9,6 @@ import traceback
 from typing import Any, Dict, List
 
 import boto3
-
 from silvaengine_utility import Utility
 
 
@@ -55,7 +54,10 @@ class OpenAIFunctBase:
             self.aws_lambda,
             **{"endpoint_id": self.endpoint_id, "funct": funct, "params": params},
         )
-        return Utility.json_loads(Utility.json_loads(result))["data"]
+        result = Utility.json_loads(Utility.json_loads(result))
+        if result.get("errors"):
+            raise Exception(result["errors"])
+        return result["data"]
 
     def inquiry_data(self, **arguments: Dict[str, Any]) -> List[Dict[str, Any]]:
         query = """fragment VectorDocInfo on VectorDocType{
