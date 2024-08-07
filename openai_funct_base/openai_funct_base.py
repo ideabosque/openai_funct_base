@@ -9,6 +9,7 @@ import traceback
 from typing import Any, Dict, List
 
 import boto3
+
 from silvaengine_utility import Utility
 
 
@@ -70,8 +71,7 @@ query getVectorDocs(
     $vectorField: String!,
     $returnFields: [String]!,
     $hybridFields: [JSON],
-    $k: String,
-    $logResults: Boolean,
+    $k: String
 ) {
     vectorDocs(
         userQuery: $userQuery,
@@ -79,8 +79,7 @@ query getVectorDocs(
         vectorField: $vectorField,
         returnFields: $returnFields,
         hybridFields: $hybridFields,
-        k: $k,
-        logResults: $logResults
+        k: $k
     ) {
         ...VectorDocInfo
     }
