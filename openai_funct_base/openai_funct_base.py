@@ -17,8 +17,8 @@ class OpenAIFunctBase:
     def __init__(self, logger: logging.Logger, **setting: Dict[str, Any]):
         try:
             # Set up AWS credentials in Boto3
-            self.endpoint_id = setting["endpoint_id"]
             self.logger = logger
+            self.endpoint_id = setting.get("endpoint_id")
             if (
                 setting.get("region_name")
                 and setting.get("aws_access_key_id")
@@ -41,6 +41,7 @@ class OpenAIFunctBase:
 
     def execute_graphql_query(
         self,
+        endpoint_id: str,
         funct: str,
         query: str,
         variables: Dict[str, Any] = {},
@@ -53,7 +54,7 @@ class OpenAIFunctBase:
         result = Utility.invoke_funct_on_aws_lambda(
             self.logger,
             self.aws_lambda,
-            **{"endpoint_id": self.endpoint_id, "funct": funct, "params": params},
+            **{"endpoint_id": endpoint_id, "funct": funct, "params": params},
         )
         result = Utility.json_loads(Utility.json_loads(result))
         if result.get("errors"):
@@ -85,6 +86,7 @@ query getVectorDocs(
     }
 }"""
         return self.execute_graphql_query(
+            self.endpoint_id,
             "data_inquiry_graphql",
             query,
             {
