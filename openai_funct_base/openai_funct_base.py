@@ -36,7 +36,7 @@ class OpenAIFunctBase:
                 )
         except Exception as e:
             log = traceback.format_exc()
-            logger.error(log)
+            self.logger.error(log)
             raise e
 
     def execute_graphql_query(
@@ -46,59 +46,68 @@ class OpenAIFunctBase:
         query: str,
         variables: Dict[str, Any] = {},
     ) -> Dict[str, Any]:
-        params = {
-            "query": query,
-            "variables": variables,
-        }
+        try:
+            params = {
+                "query": query,
+                "variables": variables,
+            }
 
-        result = Utility.invoke_funct_on_aws_lambda(
-            self.logger,
-            self.aws_lambda,
-            **{"endpoint_id": endpoint_id, "funct": funct, "params": params},
-        )
-        result = Utility.json_loads(Utility.json_loads(result))
-        if result.get("errors"):
-            raise Exception(result["errors"])
-        return result["data"]
+            result = Utility.invoke_funct_on_aws_lambda(
+                self.logger,
+                self.aws_lambda,
+                **{"endpoint_id": endpoint_id, "funct": funct, "params": params},
+            )
+            result = Utility.json_loads(Utility.json_loads(result))
+            if result.get("errors"):
+                raise Exception(result["errors"])
+            return result["data"]
+        except Exception as e:
+            log = traceback.format_exc()
+            self.logger.error(log)
+            raise e
 
     def inquiry_data(self, **arguments: Dict[str, Any]) -> List[Dict[str, Any]]:
-        query = """fragment VectorDocInfo on VectorDocType{
-    vectorDoc
-}
-
-query getVectorDocs(
-    $userQuery: String!,
-    $indexName: String!,
-    $vectorField: String!,
-    $returnFields: [String]!,
-    $hybridFields: [JSON],
-    $k: String
-) {
-    vectorDocs(
-        userQuery: $userQuery,
-        indexName: $indexName,
-        vectorField: $vectorField,
-        returnFields: $returnFields,
-        hybridFields: $hybridFields,
-        k: $k
-    ) {
-        ...VectorDocInfo
+        try:
+            query = """fragment VectorDocInfo on VectorDocType{
+        vectorDoc
     }
-}"""
-        return self.execute_graphql_query(
-            self.endpoint_id,
-            "data_inquiry_graphql",
-            query,
-            {
-                "userQuery": arguments["user_query"],
-                "indexName": "embeddings-index",
-                "vectorField": "content_vector",
-                "returnFields": [
-                    "sku",
-                    "name",
-                    "url_key",
-                    "description",
-                    "vector_score",
-                ],
-            },
-        )
+
+    query getVectorDocs(
+        $userQuery: String!,
+        $indexName: String!,
+        $vectorField: String!,
+        $returnFields: [String]!,
+        $hybridFields: [JSON],
+        $k: String
+    ) {
+        vectorDocs(
+            userQuery: $userQuery,
+            indexName: $indexName,
+            vectorField: $vectorField,
+            returnFields: $returnFields,
+            hybridFields: $hybridFields,
+            k: $k
+        ) {
+            ...VectorDocInfo
+        }
+    }"""
+            return self.execute_graphql_query(
+                self.endpoint_id,
+                "data_inquiry_graphql",
+                query,
+                {
+                    "userQuery": arguments["user_query"],
+                    "indexName": "embeddings-index",
+                    "vectorField": "content_vector",
+                    "returnFields": [
+                        "sku",
+                        "name",
+                        "url_key",
+                        "description",
+                        "vector_score",
+                    ],
+                },
+            )
+        except Exception as e:
+            log = traceback.format_exc()
+            self.logger.error(log)
