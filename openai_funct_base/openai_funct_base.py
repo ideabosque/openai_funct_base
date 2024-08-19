@@ -46,25 +46,20 @@ class OpenAIFunctBase:
         query: str,
         variables: Dict[str, Any] = {},
     ) -> Dict[str, Any]:
-        try:
-            params = {
-                "query": query,
-                "variables": variables,
-            }
+        params = {
+            "query": query,
+            "variables": variables,
+        }
 
-            result = Utility.invoke_funct_on_aws_lambda(
-                self.logger,
-                self.aws_lambda,
-                **{"endpoint_id": endpoint_id, "funct": funct, "params": params},
-            )
-            result = Utility.json_loads(Utility.json_loads(result))
-            if result.get("errors"):
-                raise Exception(result["errors"])
-            return result["data"]
-        except Exception as e:
-            log = traceback.format_exc()
-            self.logger.error(log)
-            raise e
+        result = Utility.invoke_funct_on_aws_lambda(
+            self.logger,
+            self.aws_lambda,
+            **{"endpoint_id": endpoint_id, "funct": funct, "params": params},
+        )
+        result = Utility.json_loads(Utility.json_loads(result))
+        if result.get("errors"):
+            raise Exception(result["errors"])
+        return result["data"]
 
     def inquiry_data(self, **arguments: Dict[str, Any]) -> List[Dict[str, Any]]:
         try:
