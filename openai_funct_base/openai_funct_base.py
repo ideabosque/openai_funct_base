@@ -59,6 +59,8 @@ class OpenAIFunctBase:
         result = Utility.json_loads(Utility.json_loads(result))
         if result.get("errors"):
             raise Exception(result["errors"])
+        if result.get("message"):
+            raise Exception(result["message"])
         return result["data"]
 
     def inquiry_data(self, **arguments: Dict[str, Any]) -> List[Dict[str, Any]]:
