@@ -110,3 +110,4 @@ class OpenAIFunctBase:
         except Exception as e:
             log = traceback.format_exc()
             self.logger.error(log)
+            raise e
