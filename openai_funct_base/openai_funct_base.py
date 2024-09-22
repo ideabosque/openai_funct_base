@@ -18,7 +18,7 @@ class OpenAIFunctBase:
         try:
             # Set up AWS credentials in Boto3
             self.logger = logger
-            self.endpoint_id = setting.get("endpoint_id")
+            self.setting = setting
             if (
                 setting.get("region_name")
                 and setting.get("aws_access_key_id")
@@ -91,7 +91,7 @@ class OpenAIFunctBase:
         }
     }"""
             return self.execute_graphql_query(
-                self.endpoint_id,
+                self.setting.get("endpoint_id"),
                 "data_inquiry_graphql",
                 query,
                 {
