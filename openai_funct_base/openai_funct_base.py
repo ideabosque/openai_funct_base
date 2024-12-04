@@ -15,15 +15,15 @@ from silvaengine_utility import Utility
 
 
 class OpenAIFunctBase:
-    def __init__(self, logger: logging.Logger, **settings: Dict[str, Any]):
+    def __init__(self, logger: logging.Logger, **setting: Dict[str, Any]):
         """
         Initialize the OpenAIFunctBase class.
         :param logger: Logger instance for logging errors and information.
-        :param settings: Configuration settings for AWS credentials and region.
+        :param setting: Configuration setting for AWS credentials and region.
         """
         try:
             self.logger = logger
-            self.settings = settings
+            self.setting = setting
             self._initialize_aws_lambda_client()
         except (BotoCoreError, NoCredentialsError) as boto_error:
             self.logger.error(f"AWS Boto3 error: {boto_error}")
@@ -37,9 +37,9 @@ class OpenAIFunctBase:
         """
         Initialize the AWS Lambda client using the provided credentials or default configuration.
         """
-        region_name = self.settings.get("region_name")
-        aws_access_key_id = self.settings.get("aws_access_key_id")
-        aws_secret_access_key = self.settings.get("aws_secret_access_key")
+        region_name = self.setting.get("region_name")
+        aws_access_key_id = self.setting.get("aws_access_key_id")
+        aws_secret_access_key = self.setting.get("aws_secret_access_key")
 
         if region_name and aws_access_key_id and aws_secret_access_key:
             self.aws_lambda = boto3.client(
