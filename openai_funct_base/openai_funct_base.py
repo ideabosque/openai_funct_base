@@ -53,49 +53,23 @@ class OpenAIFunctBase:
 
     def execute_graphql_query(
         self,
-        endpoint_id: str,
         function_name: str,
-        query: str,
-        variables: Optional[Dict[str, Any]] = None,
+        operation_name: str,
+        operation_type: str,
+        variables: Dict[str, Any],
     ) -> Dict[str, Any]:
-        """
-        Execute a GraphQL query using an AWS Lambda function.
-        :param endpoint_id: The ID of the GraphQL endpoint.
-        :param function_name: The name of the AWS Lambda function to invoke.
-        :param query: The GraphQL query string.
-        :param variables: Optional GraphQL variables.
-        :return: Response data from the GraphQL query.
-        :raises Exception: If there is an error in the GraphQL response.
-        """
-        if variables is None:
-            variables = {}
-
-        params = {
-            "query": query,
-            "variables": variables,
-        }
-
-        try:
-            result = Utility.invoke_funct_on_aws_lambda(
-                self.logger,
-                self.aws_lambda,
-                **{
-                    "endpoint_id": endpoint_id,
-                    "funct": function_name,
-                    "params": params,
-                },
-            )
-            result = Utility.json_loads(Utility.json_loads(result))
-
-            if "data" in result:
-                return result["data"]
-            elif "errors" in result:
-                raise Exception(result["errors"])
-            elif "message" in result:
-                raise Exception(result["message"])
-            else:
-                raise Exception(f"Unknown error: {result}")
-
-        except Exception as e:
-            self.logger.error(f"Error executing GraphQL query: {e}")
-            raise
+        schema = Utility.fetch_graphql_schema(
+            self.logger,
+            self.setting["endpoint_id"],
+            function_name,
+            aws_lambda=self.aws_lambda,
+        )
+        result = Utility.execute_graphql_query(
+            self.logger,
+            self.setting["endpoint_id"],
+            function_name,
+            Utility.generate_graphql_operation(operation_name, operation_type, schema),
+            variables,
+            aws_lambda=self.aws_lambda,
+        )
+        return result
