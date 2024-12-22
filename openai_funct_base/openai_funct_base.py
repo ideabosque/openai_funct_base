@@ -24,6 +24,7 @@ class OpenAIFunctBase:
         try:
             self.logger = logger
             self.setting = setting
+            self.schemas = {}
             self._initialize_aws_lambda_client()
         except (BotoCoreError, NoCredentialsError) as boto_error:
             self.logger.error(f"AWS Boto3 error: {boto_error}")
@@ -52,21 +53,23 @@ class OpenAIFunctBase:
             self.aws_lambda = boto3.client("lambda")
 
     def fetch_graphql_schema(self, function_name: str) -> Dict[str, Any]:
-        return Utility.fetch_graphql_schema(
-            self.logger,
-            self.setting["endpoint_id"],
-            function_name,
-            aws_lambda=self.aws_lambda,
-        )
+        if self.schemas.get(function_name) is None:
+            self.schemas[function_name] = Utility.fetch_graphql_schema(
+                self.logger,
+                self.setting["endpoint_id"],
+                function_name,
+                aws_lambda=self.aws_lambda,
+            )
+        return self.schemas[function_name]
 
     def execute_graphql_query(
         self,
-        schema: Dict[str, Any],
         function_name: str,
         operation_name: str,
         operation_type: str,
         variables: Dict[str, Any],
     ) -> Dict[str, Any]:
+        schema = self.fetch_graphql_schema(function_name)
         return Utility.execute_graphql_query(
             self.logger,
             self.setting["endpoint_id"],
