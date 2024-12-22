@@ -51,20 +51,23 @@ class OpenAIFunctBase:
         else:
             self.aws_lambda = boto3.client("lambda")
 
-    def execute_graphql_query(
-        self,
-        function_name: str,
-        operation_name: str,
-        operation_type: str,
-        variables: Dict[str, Any],
-    ) -> Dict[str, Any]:
-        schema = Utility.fetch_graphql_schema(
+    def fetch_graphql_schema(self, function_name: str) -> Dict[str, Any]:
+        return Utility.fetch_graphql_schema(
             self.logger,
             self.setting["endpoint_id"],
             function_name,
             aws_lambda=self.aws_lambda,
         )
-        result = Utility.execute_graphql_query(
+
+    def execute_graphql_query(
+        self,
+        schema: Dict[str, Any],
+        function_name: str,
+        operation_name: str,
+        operation_type: str,
+        variables: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        return Utility.execute_graphql_query(
             self.logger,
             self.setting["endpoint_id"],
             function_name,
@@ -72,4 +75,3 @@ class OpenAIFunctBase:
             variables,
             aws_lambda=self.aws_lambda,
         )
-        return result
